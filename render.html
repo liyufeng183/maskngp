@@ -40,37 +40,36 @@
     // const BASE =
     //   "https://huggingface.co/ashawkey/nerf2mesh/resolve/main/scenes/"; // remote
     //   "https://huggingface.co/ashawkey/nerf2mesh"; // remote
-    const BASE = "../maskngp/scenes/"; // local
+    // const BASE= "https://huggingface.co/ashawkey/nerf2mesh/resolve/main/scenes/";
+    const BASE = "https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";// local
+    // const BASE = "../maskngp/scenes/"; // local
 
     // shaders
     const RenderVertShader = `
 in vec3 position;  // 输入的顶点位置
 in vec2 uv;        // 输入的UV坐标
-in vec3 normal;    // 输入的顶点法线
-
 out vec2 vUv;      // 输出的UV坐标,将被传递到片元着色器
-out vec3 Normal;   // 输出的顶点法线，将被传递到片元着色器
+// out vec3 Normal;   // 输出的顶点法线，将被传递到片元着色器
 // out vec3 rayDirection; // 输出的射线方向，将被传递到片元着色器
 out vec3 positionF;
 out vec3 cameraPos;
 out mat4 modelPos;
-out mat3 nomalM;
 uniform mat4 modelViewMatrix; // 模型视图矩阵（将模型空间的顶点位置转换到视图空间）
 uniform mat4 projectionMatrix;  // 投影矩阵（将视图空间的顶点位置转换到裁剪空间）
 uniform mat4 modelMatrix;        // 模型矩阵（将模型空间的顶点位置转换到世界空间）
 uniform vec3 cameraPosition; // 摄像机的位置
-uniform mat3 normalMatrix;       // 模型视图矩阵的逆转置，用于正确转换法线
+// uniform mat3 normalMatrix;       // 模型视图矩阵的逆转置，用于正确转换法线
 
 void main() {
     vUv = uv; // 将输入的UV坐标传递到片元着色器
     // Normal =  normalMatrix*normal;//将模型空间的法线转换到视图空间
-    Normal=normal;
+    // Normal=normal;
     gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 ); // 计算裁剪空间的顶点位置
     // rayDirection = (  cameraPosition-(modelMatrix * vec4( position, 1.0 )).rgb ); // 计算从摄像机位置到世界空间的顶点位置的射线方向
     positionF=position;
     cameraPos= cameraPosition;
     modelPos=modelMatrix;
-    nomalM=normalMatrix;
+    // nomalM=normalMatrix;
 
 }
 `;
@@ -83,24 +82,16 @@ precision highp float;  // 设置浮点数的精度为高精度
 layout(location = 0) out vec4 pc_FragColor;  // 输出的颜色值
 
 in vec2 vUv;  // 从顶点着色器接收的UV坐标
-in vec3 Normal;  // 从顶点着色器接收的法线
 in mat4 modelPos;
-in  mat3 nomalM;
 // in vec3 rayDirection;  // 从顶点着色器接收的射线方向
 in vec3 positionF;
 in vec3 cameraPos;
 uniform int mode;  // 渲染模式
 uniform highp sampler2D Diffuse;  // diff纹理
-uniform highp sampler2D hash0;//specular 特征
-uniform highp sampler2D hash1;//specular 特征
-// uniform highp sampler2D hash2;//specular 特征
-// uniform highp sampler2D hash3;//specular 特征
-// uniform highp sampler2D hash4;//specular 特征
+
 
 uniform highp sampler2D weightsZero;  // 第一层神经网络的权重,已经存储为sampler2D的纹理采样器格式
-uniform highp sampler2D weightsOne;  // 第二层神经网络的权重
-uniform highp sampler2D BiasZero;  // 第一层神经网络的偏移
-uniform highp sampler2D BiasOne;  // 第二层神经网络的偏移
+
 #define PI 3.14159265358979323846
 
 float[39] frencode(vec3 dir, int degree) {//返回编码完成后的dir数组(39)
@@ -152,50 +143,36 @@ float[39] frencode(vec3 dir, int degree) {//返回编码完成后的dir数组(39
 
 
 // evaluateNetwork(hash_feature, normalize(rayDirection),normal)
-vec3 evaluateNetwork(float[5] hash, float[39] dir,vec3 normal) {
+vec3 evaluateNetwork(float[3] hash, float[39] dir) {
 
     // NUM_CHANNELS_ZERO (input_dim) is hard-coded as 6->47
     // NUM_CHANNELS_ONE (hidden_dim) can vary, but should be divisible by 4  32->64
     // NUM_CHANNELS_TWO (output_dim) is hard-coded as 3
     mat4 w;
-    float[48] v;
-    vec4 bias;
+    float[44] v;
+ 
     
-    for(int i=0;i<48;i++){
+    for(int i=0;i<44;i++){
       if(i <39){
       v[i]=dir[i];
-      // v.data[i]=0.0;
       }
-      else if(i<42){
-        v[i]=normal.x;
-        // v.data[i]=0.0;
-        i=i+1;
-        v[i]=normal.y;
-        // v.data[i]=0.0;
-        i=i+1;
-        v[i]=normal.z;
-        // v.data[i]=0.0;
+      else if(i<42) {
+    v[i]=hash[i-39];
 
-
-      }
-      else if(i<47){
-        v[i]=hash[i-42];
-        // v.data[i]=0.0;
 
       }
       else{
-        v[i]=0.0;//填充0
+        v[i]=0.0;
       }
+     
     }
 
 
-
-
-
-
-    vec4 result_one[NUM_CHANNELS_ONE / 4];//64个中间层
+    // vec4 result_one[NUM_CHANNELS_ONE / 4];//64个中间层
+    vec3 result;
     int offset=0;
-    for (int j = 0; j < 48; j += 4) {
+    int i=0;
+    for (int j = 0; j < 44; j += 4) {
       
     vec4 tempv = vec4(
         v[j],
@@ -204,64 +181,29 @@ vec3 evaluateNetwork(float[5] hash, float[39] dir,vec3 normal) {
         v[j+3]
     );
     
-    // texelFetch(weightsZero, ivec2(0, NUM_CHANNELS_ONE + i), 0),
-    for (int i = 0; i < NUM_CHANNELS_ONE; i += 4) {
       
-            w = mat4(
-                texelFetch(weightsZero, ivec2(0,offset+ i), 0),
-                texelFetch(weightsZero, ivec2(0, offset+i + 1), 0),
-                texelFetch(weightsZero, ivec2(0,offset+ i + 2), 0),
-                texelFetch(weightsZero, ivec2(0,offset+i + 3), 0)
-            );
-            // if(j==0){}
-         
-            if(j==0){
-              bias=vec4(
-              // texelFetch(BiasZero, ivec2(0,i/4), 0)
-              texelFetch(BiasZero, ivec2(0,i), 0).r,
-              texelFetch(BiasZero, ivec2(0,i+1), 0).r,
-              texelFetch(BiasZero, ivec2(0,i+2), 0).r,
-              texelFetch(BiasZero, ivec2(0,i+3), 0).r
-            );
-            result_one[i / 4] += tempv * w+bias;
-            }
-            else {
-              result_one[i / 4] += tempv * w;
-            }
-            // result_one[i / 4] += tempv * w;
-        }
-        offset=offset+(1*NUM_CHANNELS_ONE);
-    }
-
-    vec3 result;
-
-    for (int i = 0; i < NUM_CHANNELS_ONE / 4; i++) {
-        vec4 tempv2 = max(result_one[i], 0.0); // relu
-        // vec4 tempv2=result_one[i];
         w = mat4(
-            texelFetch(weightsOne, ivec2(0, i * 3), 0),
-            texelFetch(weightsOne, ivec2(0, i * 3 + 1), 0),
-            texelFetch(weightsOne, ivec2(0, i * 3 + 2), 0),
-            vec4(0.0,0.0,0.0,0.0) // padding
-        );
-        
-       
-        if(i==0){
-          bias=vec4(
-          // texelFetch(BiasOne, ivec2(0,0), 0)
-              texelFetch(BiasOne, ivec2(0,0), 0).r,
-              texelFetch(BiasOne, ivec2(0,1), 0).r,
-              texelFetch(BiasOne, ivec2(0,2), 0).r,
-              texelFetch(BiasOne, ivec2(0,3), 0).r
+                texelFetch(weightsZero, ivec2(0, i), 0),
+                texelFetch(weightsZero, ivec2(0, i + 1), 0),
+                texelFetch(weightsZero, ivec2(0, i + 2), 0),
+                // texelFetch(weightsZero, ivec2(0,j + 3), 0)
+                vec4(0.0,0.0,0.0,0.0) // padding
             );
-        result += (tempv2 * w+bias).xyz;}
-        else{
-          result += (tempv2 * w).xyz;
+      i=i+3;
+         
+
+            result += (tempv * w).xyz;
+ 
         }
-        // result += (tempv2 * w).xyz;
-    }
-    // vec3 test=vec3(0.35,0.35,0.36);//说明fragcolor的值为0-1之间,而现在返回的值其实就是0.5左右的固定错误值
-    // result= -result;
+        // offset=offset+(1*NUM_CHANNELS_ONE);
+    
+
+   
+
+
+        // vec4 tempv2 = max(result_one[i], 0.0); // relu
+
+        
     return 1.0 / (1.0 + exp(-result)); 
     
 
@@ -271,48 +213,35 @@ void main() {
   vec3 rayDirection = ( cameraPos-(modelPos*vec4( positionF, 1.0 )).rgb ); 
   vec3 rayDirection2 = ( cameraPos-(vec4( positionF, 1.0 )).rgb ); 
   vec3 dis= rayDirection- rayDirection2;
-  vec3 normal=Normal;
+  // vec3 normal=Normal;
   // vec3 normal2=Normal;
   // vec3 disN=normal-normal2;
   // rayDirection = ((modelMatrix * vec4( positionF, 1.0 )).rgb - cameraPosition); 
-    // if(mode ==2) {
-        float[5] hash_feature;//获取32维的hash特征
-        float[39] Dir=frencode((normalize(rayDirection)),6);//获取39维的归一化后fre编码的dir
-        // FreArray Dir=frencode(((rayDirection)),6);//获取39维的dir
-        // vec4 thash0=texture(hash0,vUv);//float类型
-       
-        vec4 thash0=texture(hash0,vUv);//float类型
-        vec4 hash0=thash0;
-        // thash0=(thash0/65535.0)*15.2-6.97;//返归一化
-        // thash0=(thash0)*15.2-6.97;//返归一化
-        
-        thash0=(thash0)*16.92-7.69;//4096
-        vec4 thash1=texture(hash1,vUv);
-        vec4 hash1=thash1;
-        // thash1=(thash1/65535.0)*15.2-6.97;
-        // thash1=(thash1)*15.2-6.97;//返归一化
-      
-        thash1=(thash1)*16.92-7.69;//4096
-        hash_feature[0]     = thash0.r;
-        hash_feature[1]     = thash0.g;
-        hash_feature[2]     = thash0.b;
-        hash_feature[3]     = thash1.g;
-        hash_feature[4]     = thash1.b;
 
+        float[3] hash_feature;//获取32维的hash特征
+        float[39] Dir=frencode((normalize(rayDirection)),6);//获取39维的归一化后fre编码的dir
         vec4 diffuse = texture( Diffuse, vUv );
-        // vec3 normal=vec3(normalize(Normal).x,normalize(Normal).y,normalize(Normal).z);
-        // if (mode == 2) { // 如果渲染模式为2(只渲染高光），则输出颜色为通过神经网络计算的高光颜色
+        vec4 hash0=diffuse;
+        diffuse=diffuse*30.81-12.04;
+      
+
+        hash_feature[0]     = diffuse.r;
+        hash_feature[1]     = diffuse.g;
+        hash_feature[2]     = diffuse.b;
+        // hash_feature[3]     = thash1.g;
+        // hash_feature[4]     = thash1.b;
+
+        
+
             vec3 testn=vec3(0.0,0.0,0.0);
-            float[5] testh;
+            float[3] testh;
             float[39] testr;
             //Dir应该是对的,Hash和normal随便初始化一个都一样,说明完全不对
-            // pc_FragColor.rgb = evaluateNetwork(testh, testr,normalize(Normal));
-            // pc_FragColor.rgb = evaluateNetwork(hash_feature, (Dir),normalize(Normal))/255.0;
-            // vec3 tSpecular =clamp( evaluateNetwork(hash_feature, (Dir),normalize(Normal)),0.0f,1.0f);
-            vec3 tSpecular =evaluateNetwork(hash_feature, (Dir),normalize(Normal));
-            // vec3 tSpecular =evaluateNetwork(hash_feature, (testr),normalize(testn));
-            // pc_FragColor.rgb = clamp((diffuse.rgb + evaluateNetwork(hash_feature, (Dir),normalize(Normal)))/2.0, 0.0f, 1.0f);
-            pc_FragColor.rgb =((diffuse.rgb)+(tSpecular.rgb))/2.0;
+            vec3 tSpecular =evaluateNetwork(hash_feature, (Dir));
+            vec3 tDiff=diffuse.rgb;
+            tDiff=1.0 / (1.0 + exp(-tDiff));
+
+            pc_FragColor.rgb =((tDiff.rgb)+(tSpecular.rgb))/2.0;
           
 
         // } 
@@ -384,61 +313,15 @@ void main() {
       return texture;
     }
 
-    function createNetworkBias(network_bias) {
-      let width = network_bias.length; //64,3
-      // let height = network_weights[0].length; //32->64,3->3
-
-      console.log("bias的长度是", width);
-      // console.log('高度是',height)
-
-      let weightsData = new Float32Array(width);
-
-      for (let ci = 0; ci < width; ci++) {
-        // let index = ci; // column-major
-        // let weight = network_bias[ci];
-        // weightsData[index] = weight;
-        weightsData[ci] = network_bias[ci];
-      }
-      let width_pad;
-      if (width % 4 != 0) {
-        width_pad = width + (4 - (width % 4));
-      } // make divisible by 4
-      else {
-        width_pad = width;
-      }
-      console.log("当前bisa填充后的长度", width_pad);
-      let weightsData_pad = new Float32Array(width_pad);
-
-      for (let i = 0; i < width_pad; i += 1) {
-        if (i < width) {
-          weightsData_pad[i] = weightsData[i];
-        } else {
-          weightsData_pad[i] = 0.0;
-        }
-      }
-      console.log("当前的偏移未填充时如下", weightsData);
-      console.log("当前的偏移填充如下", weightsData_pad);
-      let texture = new THREE.DataTexture(
-        weightsData_pad,
-        1,
-        width_pad,
-        // THREE.RGBAFormat,
-        THREE.RedFormat,
-        THREE.FloatType
-      );
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
-      texture.needsUpdate = true;
-      // console.log("函数中的texture is: ",texture);
-      return texture;
-    }
+    
 
     function createViewDependenceFunctions(network_weights) {
-      let channelsZero = network_weights["net.0.weight"].length; //47
-      let channelsOne = network_weights["net.1.weight"].length; //64
-      let channelsTwo = network_weights["net.1.weight"][0].length; //3
+      let channelsZero = network_weights["net.0.weight"].length; //42
+
+  
+      let channelsOne = network_weights["net.0.weight"][0].length; //3
       // console.log('')
-      console.log("[INFO] load MLP: ", channelsZero, channelsOne, channelsTwo);
+      console.log("[INFO] load MLP: ", channelsZero, channelsOne);
 
       let RenderFragShader = RenderFragShader_template.replace(
         new RegExp("NUM_CHANNELS_ZERO", "g"),
@@ -448,10 +331,7 @@ void main() {
         new RegExp("NUM_CHANNELS_ONE", "g"),
         channelsOne
       );
-      RenderFragShader = RenderFragShader.replace(
-        new RegExp("NUM_CHANNELS_TWO", "g"),
-        channelsTwo
-      );
+
 
       return RenderFragShader;
     }
@@ -637,7 +517,7 @@ void main() {
       // separate config per scene,不同场景不同的设置
       scene_names.forEach((name, index) => {
         configs[name] = {
-          renderMode: 2, // rendering mode: 0 = normal, 1 = diffuse, 2 = specular.
+          // renderMode: 2, // rendering mode: 0 = normal, 1 = diffuse, 2 = specular.
           pos_x: parseFloat(params.get(name + ".pos_x")) || 0,
           pos_y: parseFloat(params.get(name + ".pos_y")) || 0,
           pos_z: parseFloat(params.get(name + ".pos_z")) || 0,
@@ -649,21 +529,21 @@ void main() {
           rot_z: parseFloat(params.get(name + ".rot_z")) || 0,
         };
         const folder = gui.addFolder(name);
-        folder
-          .add(configs[name], "renderMode", {
-            normal: 0,
-            diffuse: 1,
-            specular: 2,
-          })
-          .onChange((v) => {
-            sceneRef[name].forEach((object, index) => {
-              object.traverse(function (child) {
-                if (child.type == "Mesh") {
-                  child.material.uniforms["mode"]["value"] = v;
-                }
-              });
-            });
-          });
+        // folder
+        //   .add(configs[name], "renderMode", {
+        //     normal: 0,
+        //     diffuse: 1,
+        //     specular: 2,
+        //   })
+        //   .onChange((v) => {
+        //     sceneRef[name].forEach((object, index) => {
+        //       object.traverse(function (child) {
+        //         if (child.type == "Mesh") {
+        //           child.material.uniforms["mode"]["value"] = v;
+        //         }
+        //       });
+        //     });
+        //   });
         folder.add(configs[name], "pos_x", -10, 10).onChange((v) => {
           sceneRef[name].forEach((object, index) => {
             object.position.x = v;
@@ -781,42 +661,27 @@ void main() {
               // check bound, load all meshes
               // let bound = network_weights["bound"];
               // let cascade = network_weights["cascade"];
-              let cascade = 5; //存储到8张图片（每张图片4维）
+              let cascade = 3; //存储到8张图片（每张图片4维）
 
               initProgressBar(name, cascade);
               sceneRef[name] = [];
 
               // for (let cas = 0; cas < cascade; cas++) {//多张图片的存储
               // load feature texture,漫反射材质与镜面反射材质
-              let tex0 = new THREE.TextureLoader().load(
-                BASE + name + "/feat012_" + ".png",
-                (object) => {
-                  console.log("[INFO] loaded feature0:", name);
-                  updateProgressBar(name, 0);
-                }
-              );
-              console.log("the tex0 is: ", tex0);
-              let tex1 = new THREE.TextureLoader().load(
-                BASE + name + "/feat234_" + ".png",
-                (object) => {
-                  console.log("[INFO] loaded feature1:", name);
-                  updateProgressBar(name, 1);
-                }
-              );
-
+          
               let diffuse = new THREE.TextureLoader().load(
                 BASE + name + "/diffse_float32" + ".png",
                 (object) => {
                   console.log("[INFO] loaded diffuse", name);
-                  updateProgressBar(name, 5);
+
+                  updateProgressBar(name, 0);
+                  updateProgressBar(name, 1);
+                  updateProgressBar(name, 2);
                 }
               );
 
               // console.log("the tex4 is: ", tex4);
-              tex0.magFilter = THREE.NearestFilter;
-              tex0.minFilter = THREE.NearestFilter;
-              tex1.magFilter = THREE.NearestFilter;
-              tex1.minFilter = THREE.NearestFilter;
+        
               diffuse.magFilter = THREE.NearestFilter;
               diffuse.minFilter = THREE.NearestFilter;
 
@@ -826,7 +691,7 @@ void main() {
               // tex1.minFilter = THREE.MipMapLinearFilter;
               // diffuse.magFilter = THREE.MipMapLinearFilter;
               // diffuse.minFilter = THREE.MipMapLinearFilter;
-              
+
               // tex0.magFilter = THREE.LinearFilter;
               // tex0.minFilter = THREE.LinearFilter;
               // tex1.magFilter = THREE.LinearFilter;
@@ -842,20 +707,8 @@ void main() {
                 network_weights["net.0.weight"]
               );
               console.log("weightsTexZero is: ", weightsTexZero);
-              let weightsTexOne = createNetworkWeightTexture(
-                network_weights["net.1.weight"]
-              );
-              console.log("weightsTexOne is: ", weightsTexOne);
+              
 
-              let weightsBiasZero = createNetworkBias(
-                network_weights["net.0.bias"]
-              );
-              console.log("weightsBiasZero is: ", weightsBiasZero);
-
-              let weightsBiasOne = createNetworkBias(
-                network_weights["net.1.bias"]
-              );
-              console.log("weightsBiasOne is: ", weightsBiasOne);
 
               let newmat = new THREE.RawShaderMaterial({
                 side: THREE.DoubleSide,
@@ -866,13 +719,10 @@ void main() {
                   // tDiffuse: { value: tex0 },
                   // tSpecular: { value: tex1 },
                   // hash:{value:tex},//加载的hash特征
-                  hash0: { value: tex0 },
-                  hash1: { value: tex1 },
+      
                   Diffuse: { value: diffuse },
                   weightsZero: { value: weightsTexZero },
-                  weightsOne: { value: weightsTexOne },
-                  BiasZero: { value: weightsBiasZero },
-                  BiasOne: { value: weightsBiasOne },
+                 
                 },
                 glslVersion: THREE.GLSL3,
               });
