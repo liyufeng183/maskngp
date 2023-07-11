@@ -40,8 +40,8 @@
     // const BASE =
     //   "https://huggingface.co/ashawkey/nerf2mesh/resolve/main/scenes/"; // remote
     //   "https://huggingface.co/ashawkey/nerf2mesh"; // remote
-    // const BASE = "../maskngp/scenes/"; // local
-    const BASE="https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";
+    const BASE = "../maskngp/scenes/"; // local
+    // const BASE="https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";
     // const BASE = "https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";// local
 
     // shaders
@@ -287,16 +287,23 @@ void main() {
             // pc_FragColor.rgb = evaluateNetwork(testh, testr,normalize(Normal));
             // pc_FragColor.rgb = evaluateNetwork(hash_feature, (Dir),normalize(Normal))/255.0;
             // vec3 tSpecular =clamp( evaluateNetwork(hash_feature, (Dir),normalize(Normal)),0.0f,1.0f);
-            vec3 tSpecular =evaluateNetwork(hash_feature, (Dir));
+            // vec3 tSpecular =evaluateNetwork(hash_feature, (Dir));
 
             // vec3 tSpecular =evaluateNetwork(hash_feature, (testr),normalize(testn));
-            pc_FragColor.rgb = clamp((diffuse.rgb + evaluateNetwork(hash_feature, (Dir))), 0.0f, 1.0f);
+            // pc_FragColor.rgb = clamp((diffuse.rgb + evaluateNetwork(hash_feature, (Dir))), 0.0f, 1.0f);
             // pc_FragColor.rgb =(tSpecular.rgb+diffuse.rgb)/2.0;
             // pc_FragColor.rgb =diffuse.rgb;
-          
 
-        // } 
-    // }
+    if (mode == 1) { // diffuse
+        pc_FragColor.rgb = diffuse.rgb;
+    } else {
+        if (mode == 2) { // specular
+            pc_FragColor.rgb = evaluateNetwork(hash_feature, (Dir));
+        } else { // full
+            pc_FragColor.rgb = clamp((diffuse.rgb +evaluateNetwork(hash_feature, (Dir))), 0.0f, 1.0f);
+        }
+      }
+
     pc_FragColor.a = 1.0;  // 设置颜色的透明度为1(不透明）
 
     // pc_FragColor.rgb = diffuse.rgb;
@@ -625,7 +632,7 @@ void main() {
       // separate config per scene,不同场景不同的设置
       scene_names.forEach((name, index) => {
         configs[name] = {
-          renderMode: 2, // rendering mode: 0 = normal, 1 = diffuse, 2 = specular.
+          renderMode: 0, // rendering mode: 0 = full, 1 = diffuse, 2 = specular.
           pos_x: parseFloat(params.get(name + ".pos_x")) || 0,
           pos_y: parseFloat(params.get(name + ".pos_y")) || 0,
           pos_z: parseFloat(params.get(name + ".pos_z")) || 0,
@@ -639,7 +646,7 @@ void main() {
         const folder = gui.addFolder(name);
         folder
           .add(configs[name], "renderMode", {
-            normal: 0,
+            full: 0,
             diffuse: 1,
             specular: 2,
           })
