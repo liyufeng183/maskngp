@@ -776,7 +776,7 @@ void main() {
               // check bound, load all meshes
               // let bound = network_weights["bound"];
               // let cascade = network_weights["cascade"];
-              let cascade = 5; //存储到8张图片（每张图片4维）
+              let cascade = 2; //存储到8张图片（每张图片4维）
 
               initProgressBar(name, cascade);
               sceneRef[name] = [];
@@ -788,7 +788,7 @@ void main() {
                 BASE + name + "/diffse_float32" + ".png",
                 (object) => {
                   console.log("[INFO] loaded diffuse", name);
-                  updateProgressBar(name, 3);
+                  updateProgressBar(name, 0);
                 }
               );
               // let tex0 = new THREE.TextureLoader().load(
@@ -802,7 +802,7 @@ void main() {
                 BASE + name + "/specular" + ".png",
                 (object) => {
                   console.log("[INFO] loaded xyz", name);
-                  updateProgressBar(name, 3);
+                  updateProgressBar(name, 1);
                 }
               );
 
