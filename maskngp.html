@@ -1,0 +1,251 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>
+    MaskNGP
+  </title>
+
+
+
+  <!-- bootstrap -->
+  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+  <!-- icon -->
+  <script src="https://kit.fontawesome.com/87dc3e863a.js" crossorigin="anonymous"></script>
+  <!-- font -->
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+  <style>
+    body {
+      background: rgb(255, 255, 255) no-repeat fixed top left;
+      font-family:'Open Sans', sans-serif;
+    }
+  </style>
+
+</head>
+
+<body>
+  <!-- cover -->
+  <section>
+    <div class="jumbotron text-center mt-0" style="padding-bottom: 0px;">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col">
+            <!-- paper title -->
+            <h2 style="font-size:30px;">
+              MaskndsNGP
+            </h2>
+            
+            <!-- publication -->
+            <!-- <h4 style="color:#6e6e6e;"> ArXiv 2023 </h4> -->
+
+            <hr>
+            
+            <!-- authors -->
+            <h6> <a href="https://me.kiui.moe/" target="_blank">XXX</a><sup>1</sup>, 
+                 <a href="https://hangz-nju-cuhk.github.io/" target="_blank">XXX</a><sup>2</sup>, 
+                 <a href="https://charlescxk.github.io/" target="_blank">XXX</a><sup>1</sup>, 
+                 XXX<sup>2</sup>, 
+                 XXX<sup>2</sup>, 
+
+                 <br>
+                 <br>
+            <p> <sup>1</sup> XXX University &nbsp;
+                <br>
+            </p>
+            
+            <!-- links -->
+            <div class="row justify-content-center">
+              <!-- link to arxiv -->
+              <div style="margin: 5px;">
+                <!-- <p class="mb-5"><a class="btn btn-large btn-dark" href="https://arxiv.org/abs/2303.02091" role="button" target="_blank"> -->
+                <!-- <i class="fa fa-file-zipper"></i>  -->
+                <!-- Arxiv  -->
+                <!-- </a> </p> -->
+              </div>
+              <!-- link to paper --> 
+              <div style="margin: 5px;">
+                <!-- <p class="mb-5"><a class="btn btn-large btn-dark" href="https://huggingface.co/ashawkey/nerf2mesh/resolve/main/paper.pdf" role="button" target="_blank">
+                <i class="fa fa-file"></i>  -->
+                <!-- Paper  -->
+                <!-- </a> </p> -->
+              </div>
+              <!-- link to code -->
+              <div style="margin: 5px;">
+                <p class="mb-5"><a class="btn btn-large btn-dark" href="https://github.com/liyufeng183/maskngp" role="button" target="_blank">
+                <i class="fa fa-github-alt"></i> 
+                Code 
+                </a> </p>
+              </div>
+              <!-- link to models -->
+              <div style="margin: 5px;">
+                <p class="mb-5"><a class="btn btn-large btn-dark" href="https://huggingface.co/xiongdi/maskngp" role="button" target="_blank">
+                <i class="fa fa-database"></i> 
+                Models 
+                </a> </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- abstract -->
+  <section>
+    <div class="container">
+      <div class="row">
+        <div class="col-12 text-center">
+          <h3>Abstract</h3>
+          <div class="row justify-content-center" style="align-items:center; display:flex;">
+            <div> 
+              <!-- <img src="../images/teaser.jpg" alt="teaser" class="img-responsive" width="100%"/> -->
+            </div>
+          </div>
+          <br>
+        </div>
+          <p class="text-justify">
+                MaskndsNGP...
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <br>
+
+
+  <!-- comparison results -->
+  <section>
+    <div class="container">
+      <div class="row">
+        <div class="col-12 text-center">
+            <h3>Real-time Online Interactive Viewer Demo</h3>
+            <hr style="margin-top:0px">
+
+            <br> <h4> <b>NeRF-synthetic</b> </h4>
+            <table style="table-layout: fixed;">
+              <tbody>
+                  <tr>
+                    <td width="25%"> <a href="render_chair.html?scene=chair" style="text-decoration: none"> <img src="../images/chair.jpg" alt="chair" class="img-responsive" width="100%"/> <b>Chair</b> </a> </td>
+                    <td width="25%"> <a href="render_drums.html?scene=drums" style="text-decoration: none"> <img src="../images/drums.jpg" alt="drums" class="img-responsive" width="100%"/> <b>Drums</b> </a> </td>
+                    <td width="25%"> <a href="render_ficus.html?scene=ficus" style="text-decoration: none"> <img src="../images/ficus.jpg" alt="ficus" class="img-responsive" width="100%"/> <b>Ficus</b> </a> </td>
+                    <td width="25%"> <a href="render_hotdog.html?scene=hotdog" style="text-decoration: none"> <img src="../images/hotdog.jpg" alt="hotdog" class="img-responsive" width="100%"/> <b>Hotdog</b> </a> </td>
+                    <!-- <td width="25%"> <a href="render.html?scene=6DoF" style="text-decoration: none"> <img src="../images/6DoF.png" alt="6DoF" class="img-responsive" width="100%"/> <b>6DoF(Click me)</b> </a> </td> -->
+                  </tr>
+                  <tr>
+                    <td width="25%"> <a href="render_lego.html?scene=lego" style="text-decoration: none"> <img src="../images/lego.jpg" alt="lego" class="img-responsive" width="100%"/> <b>Lego</b> </a> </td>
+                    <td width="25%"> <a href="render_material.html?scene=materials" style="text-decoration: none"> <img src="../images/materials.jpg" alt="materials" class="img-responsive" width="100%"/> <b>Materials</b> </a> </td>
+                    <td width="25%"> <a href="render_mic.html?scene=mic" style="text-decoration: none"> <img src="../images/mic.jpg" alt="mic" class="img-responsive" width="100%"/> <b>Mic</b> </a> </td>
+                    <td width="25%"> <a href="render_ship.html?scene=ship" style="text-decoration: none"> <img src="../images/ship.jpg" alt="ship" class="img-responsive" width="100%"/> <b>Ship</b> </a> </td>
+                  </tr>
+                  <!-- <tr>
+                    <td width="25%"> <a href="render_6DOF.html?scene=6DoF" style="text-decoration: none"> <img src="../images/6DoF.png" alt="6DoF" class="img-responsive" width="100%"/> <b>6DoF(Click me)</b> </a> </td>
+                  </tr> -->
+
+
+
+              </tbody>
+            </table>
+
+            <br> <h4><b>Human</b></h4>
+            <table style="table-layout: fixed;">
+              <tbody>
+                <tr>
+                  <td width="25%"> <a href="render_6DOF.html?scene=6DoF" style="text-decoration: none"> <img src="../images/6DoF.png" alt="6DoF" class="img-responsive" width="25%"/> <b>6DoF</b> </a> </td>
+                  <td width="25%"> <a href="render_6DOF.html?scene=6DoF" style="text-decoration: none"> <img src="../images/6DoF.png" alt="6DoF" class="img-responsive" width="25%"/> <b>6DoF</b> </a> </td>
+                  <!-- <td width="25%"> <a href="render_ship.html?scene=ship" style="text-decoration: none"> <img src="../images/ship.jpg" alt="ship" class="img-responsive" width="100%"/> <b>Ship</b> </a> </td> -->
+                </tr>
+
+              </tbody>
+            </table>
+
+            <br> <h4><b>Mip-NeRF 360</b></h4>
+            <table style="table-layout: fixed;">
+              <tbody>
+                  <tr>
+                    <td width="33%"> <a href="render.html?scene=garden" style="text-decoration: none"> <img src="images/garden.jpg" alt="garden" class="img-responsive" width="100%"/> <b>Garden</b> </a> </td>
+                    <td width="33%"> <a href="render.html?scene=bicycle" style="text-decoration: none"> <img src="images/bicycle.jpg" alt="bicycle" class="img-responsive" width="100%"/> <b>Bicycle</b> </a> </td>
+                    <td width="33%"> <a href="render.html?scene=stump" style="text-decoration: none"> <img src="images/stump.jpg" alt="stump" class="img-responsive" width="100%"/> <b>Stump</b> </a> </td>  
+                  </tr>
+              </tbody>
+            </table>
+            <table style="table-layout: fixed;">
+              <tbody>
+                <tr>
+                  <td width="25%"> <a href="render.html?scene=bonsai" style="text-decoration: none"> <img src="images/bonsai.jpg" alt="bonsai" class="img-responsive" width="100%"/> <b>Bonsai</b> </a> </td>
+                  <td width="25%"> <a href="render.html?scene=kitchen" style="text-decoration: none"> <img src="images/kitchen.jpg" alt="kitchen" class="img-responsive" width="100%"/> <b>Kitchen</b> </a> </td>
+                  <td width="25%"> <a href="render.html?scene=room2" style="text-decoration: none"> <img src="images/room2.jpg" alt="room" class="img-responsive" width="100%"/> <b>Room</b> </a> </td>  
+                  <td width="25%"> <a href="render.html?scene=counter" style="text-decoration: none"> <img src="images/counter.jpg" alt="counter" class="img-responsive" width="100%"/> <b>Counter</b> </a> </td>  
+                </tr>
+              </tbody>
+            </table>
+
+            <br> <h4><b>Scene Composition</b></h4>
+            <table style="table-layout: fixed;">
+              <tbody>
+                  <tr>
+                    <td width="50%"> <a href="render.html?scene=drums&drums.pos_x=4&scene=lego&lego.pos_x=2&scene=mic&mic.pos_y=2&scene=chair&chair.pos_x=2&chair.pos_y=2&scene=ficus&&scene=ship&ship.pos_x=4&ship.pos_y=2" style="text-decoration: none"> <img src="images/objects.jpg" alt="objects" class="img-responsive" width="100%"/> <b>Objects</b> </a> </td>
+                    <td width="50%"> <a href="render.html?scene=garden&&scene=chair&chair.pos_x=-0.2&chair.pos_y=0.6&chair.pos_z=-0.6&chair.scale_x=0.3&chair.scale_y=0.3&chair.scale_z=0.3&scene=hotdog&hotdog.pos_x=-0.15&hotdog.pos_y=0.4&hotdog.pos_z=-0.5&hotdog.scale_x=0.15&hotdog.scale_y=0.15&hotdog.scale_z=0.15&scene=mic&mic.pos_x=-0.3&mic.pos_y=0.1&mic.pos_z=-0.43&mic.scale_x=0.15&mic.scale_y=0.15&mic.scale_z=0.15&mic.rot_z=296.28" style="text-decoration: none"> <img src="images/scene_and_obj.jpg" alt="scene+objects" class="img-responsive" width="100%"/> <b>Scene + Objects</b> </a> </td>
+                  </tr>
+              </tbody>
+            </table>    
+
+            <br> <h4><b>Other Captures</b></h4>
+            <table style="table-layout: fixed;">
+              <tbody>
+                  <tr>
+                    <td width="33%"> <a href="render.html?bg_color=0&scene=figure" style="text-decoration: none"> <img src="images/figure.jpg" alt="figure" class="img-responsive" width="100%"/> <b>Figure</b> </a> </td>
+                    <td width="33%"> <a href="render.html?scene=fox" style="text-decoration: none"> <img src="images/fox.jpg" alt="fox" class="img-responsive" width="100%"/> <b>Fox</b> </a> </td>
+                    <td width="33%"> <a href="render.html?scene=durian" style="text-decoration: none"> <img src="images/durian.jpg" alt="durian" class="img-responsive" width="100%"/> <b>Durian</b> </a> </td>
+                  </tr>
+              </tbody>
+            </table>   
+
+        </div>
+      </div>
+    </div>
+  </section>
+  <br>
+
+  <section>
+    <div class="container">
+      <div class="row">
+        <div class="col-12 text-center">
+          <h3>Relighting</h3>
+          <div class="row justify-content-center" style="align-items:center; display:flex;">
+              <video width="100%" controls autoplay loop style="margin: 5px;"> <source src="videos/bonsai_shading.mp4" type="video/mp4"> </video>
+          </div>
+      </div>
+    </div>
+  </section>
+  <br>
+
+
+  <!-- citing -->
+  <div class="container">
+    <div class="row ">
+      <div class="col-12">
+        <h3>Citation</h3>
+        <hr style="margin-top:0px">
+        <pre style="background-color: #e9eeef;padding: 1.25em 1.5em">
+<code>maskngp xxx
+</code></pre>
+      </div>
+    </div>
+  </div>
+
+  <footer class="text-center" style="margin-bottom:10px; font-size: medium;">
+    <hr>
+    <!-- Thanks to <a href="https://lioryariv.github.io/" target="_blank">Lior Yariv</a> for the <a href="https://lioryariv.github.io/idr/" target="_blank">website template</a>. -->
+  </footer>
+
+</body>
+</html>
