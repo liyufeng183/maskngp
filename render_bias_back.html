@@ -11,11 +11,6 @@
     />
 
     <style>
-      /* 自定义 Stats 字体大小 */
-.stats-container {
-  font-size: 50px; /* 修改字体大小为 12 像素 */
-}
-
       body,
       div {
         margin: 0;
@@ -24,41 +19,17 @@
       .renderer {
         border: dashed #000000;
       }
-      
     </style>
   </head>
 
   <body>
-
-
-
     <div
       id="container"
       style="display: flex; justify-content: center; align-items: center"
     ></div>
-    
-    <!-- <div id="info" style="position:absolute; top:800px; font-size: 50px;">
-      <div id="fpsdisplay"></div>
-      <div id="sizedisplay"></div>
-  </div> -->
-
-    <!-- <div 
-      style="position: fixed; top: 5px; left: 5px; cursor: pointer; opacity: 0.9; z-index: 10000;">
-      <canvas width="100" height="60" style="width: 128px; height: 80px; display: block;">
-      </canvas><canvas width="100" height="60" style="width: 128px; height:80px; display: none;">
-      </canvas><canvas width="100" height="60" style="width: 128px; height: 80px; display: none;"></canvas>
-    </div> -->
-    <div id="info" style="position:absolute; top:400px; font-size: 40px;">
-      <div id="fpsdisplay"></div>
-      <div id="sizedisplay"></div>
-  </div>
-
-
     <div id="progressBar" style="text-align: center"></div>
     <canvas id="myCanvas"></canvas>
-
-
-
+    
   </body>
 
   <script type="module">
@@ -73,8 +44,8 @@
     //   "https://huggingface.co/ashawkey/nerf2mesh/resolve/main/scenes/"; // remote
     //   "https://huggingface.co/ashawkey/nerf2mesh"; // remote
     // const BASE = "../"; // local
-    const BASE="https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";
-    // const BASE = "https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";// local
+    // cconst BASE="https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";
+    const BASE = "https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";// local
 
 
     // shaders
@@ -100,7 +71,7 @@
     uniform vec3 cameraPosition; // 摄像机的位置
     uniform mat3 normalMatrix;       // 模型视图矩阵的逆转置，用于正确转换法线
     // in vec3 vnData; //法线特征
-    // uniform float vnData; //法线特征
+    uniform vec3 vnData; //法线特征
 
     void main() {
         vUv = uv; // 将输入的UV坐标传递到片元着色器
@@ -145,19 +116,19 @@
 
 //     }
 
-    // if (gl_VertexID < chunkSize){
-    //   fragNormal = smallArray1[gl_VertexID];
-    // }
-    // else if (gl_VertexID < 2*chunkSize){
-    //   fragNormal = smallArray2[gl_VertexID-chunkSize];
-    // }
-    // else if (gl_VertexID < 3*chunkSize){
-    //   fragNormal = smallArray3[gl_VertexID-2*chunkSize];
-    // }
-    // else {
-    //   fragNormal = smallArray4[gl_VertexID-3*chunkSize];
-    // }
-  // vnData[0];
+//     // if (gl_VertexID < chunkSize){
+//     //   fragNormal = smallArray1[gl_VertexID];
+//     // }
+//     // else if (gl_VertexID < 2*chunkSize){
+//     //   fragNormal = smallArray2[gl_VertexID-chunkSize];
+//     // }
+//     // else if (gl_VertexID < 3*chunkSize){
+//     //   fragNormal = smallArray3[gl_VertexID-2*chunkSize];
+//     // }
+//     // else {
+//     //   fragNormal = smallArray4[gl_VertexID-3*chunkSize];
+//     // }
+
     
 
     // 现在smallArray1 包含了您需要的部分数据
@@ -200,9 +171,8 @@ in vec3 fragNormal;
 uniform int mode;  // 渲染模式
 uniform highp sampler2D Diffuse;  // diff纹理
 uniform highp sampler2D hash1;//specular 
-uniform highp sampler2D Dirmap;//dirmap 
-uniform highp sampler2D Normap;//dirmap 
-// uniform  vec3 vnData; //法线特征
+uniform highp sampler2D Dirmap;//dirmap 特征
+uniform  vec3 vnData; //法线特征
 
 uniform highp sampler2D weightsZero;  // 第一层神经网络的权重,已经存储为sampler2D的纹理采样器格式
 uniform highp sampler2D weightsOne;  // 第二层神经网络的权重
@@ -393,28 +363,19 @@ vec3 evaluateNetwork(vec3 dirmap, float[3] hash, float ndir) {
 void main() {    
   // vec3 rayDirection = ( cameraPos-(modelPos*vec4( positionF, 1.0 )).rgb ); 
   vec3 rayDirection = ( cameraPos-(vec4( positionF, 1.0 )).rgb ); 
-        vec4 normal_map = texture(Normap,vUv.xy);//h[:3];
-        
-        float min = -1.0;
-        float max = 1.0;
-        // normal_map =  (normal_map*(max - min) + min);
-        vec3 normal_map_ = (normal_map*(max - min) + min).xyz;
-        for(int i =0;i<3;i++){
-          if (normal_map[i] ==0.0){
-            normal_map[i] = 1.0;
-          }
-        
-        }
-        //  normal_map_ = (normal_map).xyz;
+
         float[3] hash_feature;
         vec3 Dir=(normalize(rayDirection));
         // vec3 Dir=((rayDirection));
         // vec3 Ndir = Dir * fragNormal;
         // fragNormal = vnData;
         // vec3 new_fragNormal = normal;
-        float Ndir = (Dir.x * normal_map_.x + Dir.y * normal_map_.y + Dir.z * normal_map_.z);
+        
+        float Ndir = (Dir.x * fragNormal.x + Dir.y * fragNormal.y + Dir.z * fragNormal.z);
+
+
         vec3 tmp = vec3(2.0,2.0,2.0);
-        vec3 Wdir = ((tmp * Ndir * normal_map_) - Dir);
+        vec3 Wdir = ((tmp * Ndir * fragNormal) - Dir);
         // Wdir = Wdir.rgb;
         vec2 degree_xyz = dir2polar(Wdir);
         float degree_xy = degree_xyz.x;
@@ -422,13 +383,11 @@ void main() {
 
         vec3 nordegree = vec3(degree_xy, degree_z, 1.0);
         vec4 diffuse=texture(Diffuse,vUv);//h[:3];
-        // vec4 normal_map = texture(Normap,vUv);//h[:3];
         vec4 txyz=texture(hash1,vUv); //h[3:];
         vec2 polar_uv = vec2(degree_xy, degree_z);
-
         // vec2 polar_uv = vec2(degree_z, degree_xy);
         // vec4 dirmap = texture(Dirmap, polar_uv);
-        // vec4 dirmap = texture(Dirmap, polar_uv);//
+        // vec4 dirmap = texture(Dirmap, polar_uv);
         vec4 dirmap = gridSample(Dirmap,polar_uv);
 
 
@@ -436,7 +395,7 @@ void main() {
         float min_dir = -1.426039218902587891e+01;
         float max_dir = 9.251919746398925781e+00;
         dirmap = dirmap * (max_dir - min_dir) +min_dir;
-     
+        // vec3 dir_feature = grid_sample()
 
         diffuse=(diffuse);//4096
         vec3 dirmap_xyz = (dirmap.xyz);
@@ -457,10 +416,9 @@ void main() {
         } else { // full
             // pc_FragColor.rgb = clamp((diffuse.rgb +evaluateNetwork(hash_feature, (Dir))), 0.0f, 1.0f);
             pc_FragColor.rgb = clamp((diffuse.rgb +evaluateNetwork(dirmap_xyz, hash_feature, (Ndir))), 0.0f, 1.0f);
-            // pc_FragColor.rgb = normal_map_;
+            pc_FragColor.rgb = fragNormal;
             // pc_FragColor.rgb = rayDirection;
             // pc_FragColor.rgb = clamp((diffuse.rgb), 0.0f, 1.0f);
-            // pc_FragColor.rgb = vec3(0.0, 0.0, 0.0);
         }
       }
 
@@ -596,12 +554,7 @@ void main() {
       stats,
       configs,
       sceneRef;
-    let gLastFrame = window.performance.now();
-    let oldMilliseconds = 1000;
-    let gLoadedOBJs = 0;
-    let gLoadedPNGs = 0;
-    let gTotalOBJs = 0;
-    let gTotalPNGs = 0;
+
     // support changing scene name from url param
     // e.g. ?scene=lego&scene=chair
     //获取当前URL的值
@@ -628,33 +581,9 @@ void main() {
     };
     //记录config的值
     console.log(configs);
-
-
-
-    function updateFPSCounter() {
-	let currentFrame = window.performance.now();
-	let milliseconds = currentFrame - gLastFrame;
-	let smoothMilliseconds = oldMilliseconds * (0.95) + milliseconds * 0.05;
-	let smoothFps = 1000 / smoothMilliseconds;
-	gLastFrame = currentFrame;
-	oldMilliseconds = smoothMilliseconds;
-	// if (gTotalOBJs==0 || gLoadedOBJs!=gTotalOBJs || gLoadedPNGs!=gTotalPNGs) {
-	// 	document.getElementById('fpsdisplay').innerHTML = "Loaded OBJs: "+gLoadedOBJs.toFixed(0) + "/" + gTotalOBJs.toFixed(0) + "  Loaded PNGs: "+gLoadedPNGs.toFixed(0) + "/" + gTotalPNGs.toFixed(0);
-	// }
-	// else {
-		document.getElementById('fpsdisplay').innerHTML = "FPS: "+smoothFps.toFixed(1);
-	// }
-  // console.log("the time is  ",smoothFps );
-}
-
-
-
-
-
     function render() {
       renderer.setRenderTarget(null);
       renderer.render(scene, camera);
-      updateFPSCounter();
     }
 
     function animate() {
@@ -715,17 +644,8 @@ void main() {
       renderer.domElement.classList.add("renderer");
       container.appendChild(renderer.domElement);
       
-      // stats = new Stats();
-      // stats.showPanel( 0 ); // 0: fps, 1: ms, 2: mb, 3+: custom
-      // stats.domElement.style.fontSize = 200
-      // container.appendChild(stats.dom);
-
-      // 性能插件，监听fps
-    stats = new Stats();
-    const statsContainer = document.createElement('div');
-    statsContainer.classList.add('stats-container');
-    statsContainer.appendChild(stats.dom);
-    document.body.appendChild(statsContainer);
+      stats = new Stats();
+      container.appendChild(stats.dom);
 
       // create camera
       camera = new THREE.PerspectiveCamera(configs.fovy,configs.W / configs.H,configs.near,configs.far);
@@ -735,8 +655,6 @@ void main() {
       camera.up.set(0, 0, 1);
 
       controls = new OrbitControls(camera, renderer.domElement);
-    //   controls.enableDamping = true;
-    // controls.screenSpacePanning = true;
       // controls.enableDamping = true;
       // controls.screenSpacePanning = true;
       //controls.minPolarAngle = Math.PI / 2.6; // 设置最小垂直旋转角度（以弧度为单位）
@@ -953,7 +871,7 @@ void main() {
               // load feature texture,漫反射材质与镜面反射材质
 
               let diffuse = new THREE.TextureLoader().load(
-                BASE + name + "/diffusefe_" + ".jpg",
+                BASE + name + "/diffusefe" + ".jpg",
                 //BASE + name + "/diffusefe" + ".jpg",
                 (object) => {
                   console.log("[INFO] loaded diffuse texture", BASE + name + "/diffusefe" + ".jpg");
@@ -963,7 +881,7 @@ void main() {
 
               let tex1 = new THREE.TextureLoader().load(
                 //BASE + name + "/specularfe" + ".jpg",
-                BASE + name + "/specularfe_" + ".jpg",
+                BASE + name + "/specularfe" + ".jpg",
                 (object) => {
                   console.log("[INFO] loaded specular texture", BASE + name + "/specularfe" + ".jpg");
                   updateProgressBar(name, 1);
@@ -971,20 +889,10 @@ void main() {
               );
 
               let dirmap = new THREE.TextureLoader().load(
-                // BASE + name + "/dirmap" + ".png",
-                BASE + name + "/roll_0" + ".png",
+                //BASE + name + "/specularfe" + ".jpg",
+                BASE + name + "/dirmap" + ".png",
                 (object) => {
                   console.log("[INFO] loaded dirmap texture", BASE + name + "/dirmap" + ".png");
-                  updateProgressBar(name, 2);
-                }
-              );
-
-
-              let normalmap = new THREE.TextureLoader().load(
-                //BASE + name + "/specularfe" + ".jpg",
-                BASE + name + "/normal_" + ".png",
-                (object) => {
-                  console.log("[INFO] loaded normal texture", BASE + name + "/normal" + ".png");
                   updateProgressBar(name, 2);
                 }
               );
@@ -997,8 +905,6 @@ void main() {
               tex1.minFilter = THREE.NearestFilter;
               dirmap.magFilter = THREE.NearestFilter;
               dirmap.minFilter = THREE.NearestFilter;
-              normalmap.magFilter = THREE.NearestFilter;
-              normalmap.minFilter = THREE.NearestFilter;
 
 
 
@@ -1082,7 +988,7 @@ void main() {
               var tmp;
               // load obj
               // Float32Array vn;
-              let obj_mesh = new OBJLoader().load(BASE + name + "/mesh_0_" + ".obj",object => {
+              let obj_mesh = new OBJLoader().load(BASE + name + "/mesh_0" + ".obj",object => {
               // let obj_mesh = new OBJLoader().load(BASE + name + "/mesh_0_new" + ".obj",object => {  
                   object.traverse(function (child) {
                     if (child.type == "Mesh") {
@@ -1091,33 +997,48 @@ void main() {
                         // const vn_data = geometry.attributes.normal.
                         tmp = vn_data;
                         // 编译顶点着色器和片段着色器
-                      //   const vertexShader_ = gl.createShader(gl.VERTEX_SHADER);
-                      //   gl.shaderSource(vertexShader_, RenderVertShader);
-                      //   gl.compileShader(vertexShader_);
-                      //   const fragmentShader_ = gl.createShader(gl.FRAGMENT_SHADER);
-                      //   gl.shaderSource(fragmentShader_, RenderFragShader);
-                      //   gl.compileShader(fragmentShader_);
-                      //   if (!gl.getShaderParameter(vertexShader_, gl.COMPILE_STATUS)) {
-                      //   console.error("Vertex shader compilation failed: " + gl.getShaderInfoLog(vertexShader_));
-                      // }
-                      // if (!gl.getShaderParameter(fragmentShader_, gl.COMPILE_STATUS)) {
-                      //   console.error("Fragment shader compilation failed: " + gl.getShaderInfoLog(fragmentShader_));
-                      //   }
-                      //   const shaderProgram = gl.createProgram();
-                      //   gl.attachShader(shaderProgram, vertexShader_);
-                      //   gl.attachShader(shaderProgram, fragmentShader_);
-                      //   gl.linkProgram(shaderProgram);
-                      //   if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
-                      //       console.error("Shader program failed to link.");
-                      //   }
-                      //   // 创建和绑定法线缓冲区
-                      //   const normalBuffer = gl.createBuffer();
-                      //   gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-                      //   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vn_data), gl.STATIC_DRAW);
-                      //   const normalAttributeLocation = gl.getAttribLocation(shaderProgram, "vertexNormal");
-                      //   gl.enableVertexAttribArray(normalAttributeLocation);
-                      //   gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
-                      //   gl.vertexAttribPointer(normalAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+                        const vertexShader_ = gl.createShader(gl.VERTEX_SHADER);
+                        gl.shaderSource(vertexShader_, RenderVertShader);
+                        gl.compileShader(vertexShader_);
+
+                        const fragmentShader_ = gl.createShader(gl.FRAGMENT_SHADER);
+                        gl.shaderSource(fragmentShader_, RenderFragShader);
+                        gl.compileShader(fragmentShader_);
+
+                        if (!gl.getShaderParameter(vertexShader_, gl.COMPILE_STATUS)) {
+                        console.error("Vertex shader compilation failed: " + gl.getShaderInfoLog(vertexShader_));
+                      }
+                      if (!gl.getShaderParameter(fragmentShader_, gl.COMPILE_STATUS)) {
+                        console.error("Fragment shader compilation failed: " + gl.getShaderInfoLog(fragmentShader_));
+                        }
+
+                        const shaderProgram = gl.createProgram();
+                        gl.attachShader(shaderProgram, vertexShader_);
+                        gl.attachShader(shaderProgram, fragmentShader_);
+                        gl.linkProgram(shaderProgram);
+                        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+                            console.error("Shader program failed to link.");
+                        }
+
+                        // 创建和绑定法线缓冲区
+                        const normalBuffer = gl.createBuffer();
+                        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+                        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vn_data), gl.STATIC_DRAW);
+
+                        const normalAttributeLocation = gl.getAttribLocation(shaderProgram, "vertexNormal");
+                        gl.enableVertexAttribArray(normalAttributeLocation);
+
+
+                        gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer);
+                        gl.vertexAttribPointer(normalAttributeLocation, 3, gl.FLOAT, false, 0, 0);
+
+
+
+
+
+
+
+                    
                        let  newmat = new THREE.RawShaderMaterial({
                         
                         side: THREE.DoubleSide,
@@ -1138,7 +1059,6 @@ void main() {
                           // hash0:{value:tex0},
                           hash1: { value: tex1 },
                           Dirmap: { value: dirmap },
-                          Normap: {value: normalmap},
                           weightsZero: { value: weightsTexZero },
                           weightsOne: { value: weightsTexOne },
                           BiasZero: { value: weightsBiasZero },

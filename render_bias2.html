@@ -73,8 +73,8 @@
     //   "https://huggingface.co/ashawkey/nerf2mesh/resolve/main/scenes/"; // remote
     //   "https://huggingface.co/ashawkey/nerf2mesh"; // remote
     // const BASE = "../"; // local
-    const BASE="https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";
-    // const BASE = "https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";// local
+    // cconst BASE="https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";
+    const BASE = "https://huggingface.co/xiongdi/maskngp/resolve/main/scenes/";// local
 
 
     // shaders
@@ -972,7 +972,7 @@ void main() {
 
               let dirmap = new THREE.TextureLoader().load(
                 // BASE + name + "/dirmap" + ".png",
-                BASE + name + "/roll_0" + ".png",
+                BASE + name + "/roll_1" + ".png",
                 (object) => {
                   console.log("[INFO] loaded dirmap texture", BASE + name + "/dirmap" + ".png");
                   updateProgressBar(name, 2);
